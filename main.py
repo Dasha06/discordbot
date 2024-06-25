@@ -108,6 +108,7 @@ async def on_message_delete(message):
         await channel.send(embed=embed)
 
 # не работает до конца, надо разобраться в этом
+# создание своего приват канала через канал start
 @bot.event
 async def on_voice_state_update(member, before, after):
     global v_channel
