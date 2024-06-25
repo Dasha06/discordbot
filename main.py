@@ -107,7 +107,7 @@ async def on_message_delete(message):
         embed.add_field(name="Содержание", value=message.content, inline=False)
         await channel.send(embed=embed)
 
-# не работает до конца
+# не работает до конца, надо разобраться в этом
 @bot.event
 async def on_voice_state_update(member, before, after):
     global v_channel
