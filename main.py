@@ -5,13 +5,15 @@ import asyncio
 import os
 from datetime import datetime
 import config as cf
+from database import DB
 
 intents = discord.Intents.default()  # Подключаем "Разрешения"
 intents.message_content = True
 intents.members = True
 # Задаём префикс и интенты
 bot = commands.Bot(command_prefix='/', intents=intents)
-vChannels = {}
+vChannels = DB()
+connection = vChannels.create_connection("urVChan.sqlite")
 client = discord.Client(intents=intents)
 
 class MyModal(discord.ui.Modal):
@@ -107,17 +109,16 @@ async def on_message_delete(message):
         embed.add_field(name="Содержание", value=message.content, inline=False)
         await channel.send(embed=embed)
 
-# не работает до конца, надо разобраться в этом
 # создание своего приват канала через канал start
 @bot.event
 async def on_voice_state_update(member, before, after):
-    global v_channel
+    global category
     GUILD = bot.get_guild(1209541686821261342)
     if after.channel is not None:
         if after.channel.id == 1240184145947263016:
             category = discord.utils.get(GUILD.categories, name='секретка')
             if discord.utils.get(GUILD.channels, name=f'Приват-{member.display_name}') != None:
-                await member.move_to(discord.utils.get(GUILD.channels, name=f'Приват-{member.display_name}') )
+                await member.move_to(discord.utils.get(GUILD.channels, name=f'Приват-{member.display_name}')    )
                 return
             # overwrite = {
             #     GUILD.default_role: discord.PermissionOverwrite(read_messages=False, manage_channels=False),
@@ -125,21 +126,21 @@ async def on_voice_state_update(member, before, after):
             #                                         kick_members=True, mute_members=True, priority_speaker=True)}
 
             v_channel = await GUILD.create_voice_channel(name=f'Приват-{member.display_name}', category=category)
-            vChannels[f'{member.display_name}'] = v_channel
+            vChannels.add_channel(connection, v_channel.id)
             await member.move_to(v_channel)
 
-        # не работает
-        # elif len(before.channel.members) == 0:
-        #     print(vChannels)
-        #     await vChannels[f'{member.display_name}'].delete()
-        #     del vChannels[f'{member.display_name}']
+        if before.channel is not None:
+            if len(before.channel.members) == 0 and before.channel.id != 1240184145947263016 and before.channel in category.voice_channels:
+                await before.channel.delete()
+                vChannels.delete_Channel(connection, before.channel.id)
 
-    elif len(before.channel.members) == 0:
-        print(vChannels)
-        await vChannels[f'{member.display_name}'].delete()
-        del vChannels[f'{member.display_name}']
-        # v_channel = None
-        # await discord.utils.get(GUILD.channels, name=f'Приват-{member.display_name}').delete()
+    elif before.channel is not None and before.channel.id in vChannels.find_channel(connection):
+        if len(before.channel.members) == 0:
+            await before.channel.delete()
+            vChannels.delete_Channel(connection, before.channel.id)
+    # elif len(before.channel.members) == 0:
+    #     await before.channel.delete()
+    #     vChannels.delete_Channel(connection, before.channel.id)
 
     # if before.channel is not None:
     #     channels = private.find_one({'_id':member.id})
