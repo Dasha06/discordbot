@@ -26,12 +26,12 @@ class DB:
         except Error as e:
             print(f"The error '{e}' occurred")
 
-    def add_channel(self, connection, vchan):
+    def add_channel(self, connection, vchan, tchan):
         add_chan = f"""
         INSERT INTO
-          channels (vchannelId)
+          channels (vchannel, tchannel)
         VALUES
-          ({vchan})
+          ({vchan}, {tchan})
         """
         cursor = connection.cursor()
         try:
@@ -42,7 +42,7 @@ class DB:
             print(f"The error '{e}' occurred")
 
     def delete_Channel(self, connection, vchan):
-        delete_Chan = f"DELETE FROM channels WHERE vChannelId = {vchan}"
+        delete_Chan = f"DELETE FROM channels WHERE vchannel = {vchan}"
         cursor = connection.cursor()
         try:
             cursor.execute(delete_Chan)
@@ -51,8 +51,8 @@ class DB:
         except Error as e:
             print(f"The error '{e}' occurred")
 
-    def find_channel(self, connection):
-        find_Chan = f"SELECT * FROM channels"
+    def find_vchannel(self, connection):
+        find_Chan = "SELECT vchannel FROM channels"
         channs = []
         cursor = connection.cursor()
         try:
@@ -66,10 +66,31 @@ class DB:
         except Error as e:
             print(f"The error '{e}' occurred")
 
+    def find_tchannel(self, connection, vchan):
+        find_Chan = f"SELECT tchannel FROM channels WHERE vchannel = {vchan}"
+        channs = 0
+        cursor = connection.cursor()
+        try:
+            cursor.execute(find_Chan)
+            res = cursor.fetchall()
+            connection.commit()
+            for i in res:
+                for j in i:
+                    channs = (int(j))
+            return channs
+        except Error as e:
+            print(f"The error '{e}' occurred")
+
 
 dan = DB()
 connection = dan.create_connection("urVChan.sqlite")
 
+create_users_table = """
+CREATE TABLE IF NOT EXISTS channels (
+  vchannel INTEGER PRIMARY KEY,
+  tchannel INTEGER NOT NULL
+);
+"""
 
 if __name__ == '__main__':
     print(dan.find_channel(connection))

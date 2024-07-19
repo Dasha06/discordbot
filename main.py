@@ -6,6 +6,7 @@ import os
 from datetime import datetime
 import config as cf
 from database import DB
+from SettingVoiceChannels import MyView
 
 intents = discord.Intents.default()  # Подключаем "Разрешения"
 intents.message_content = True
@@ -20,13 +21,8 @@ class MyModal(discord.ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(
             discord.ui.InputText(
-                label="Short Input",
+                label="Введите название для изменения имени канала",
                 placeholder="Placeholder Test",
-            ),
-            discord.ui.InputText(
-                label="Longer Input",
-                value="Longer Value\nSuper Long Value",
-                style=discord.InputTextStyle.long,
             ),
             *args,
             **kwargs,
@@ -38,9 +34,6 @@ class MyModal(discord.ui.Modal):
             fields=[
                 discord.EmbedField(
                     name="First Input", value=self.children[0].value, inline=False
-                ),
-                discord.EmbedField(
-                    name="Second Input", value=self.children[1].value, inline=False
                 ),
             ],
             color=discord.Color.random(),
@@ -126,7 +119,8 @@ async def on_voice_state_update(member, before, after):
             #                                         kick_members=True, mute_members=True, priority_speaker=True)}
 
             v_channel = await GUILD.create_voice_channel(name=f'Приват-{member.display_name}', category=category)
-            vChannels.add_channel(connection, v_channel.id)
+            t_channel = await GUILD.create_text_channel(name=f'Выдача прав ({member.display_name})', category=category)
+            vChannels.add_channel(connection, v_channel.id, t_channel.id)
             await member.move_to(v_channel)
 
         if before.channel is not None:
@@ -134,7 +128,7 @@ async def on_voice_state_update(member, before, after):
                 await before.channel.delete()
                 vChannels.delete_Channel(connection, before.channel.id)
 
-    elif before.channel is not None and before.channel.id in vChannels.find_channel(connection):
+    elif before.channel is not None and before.channel.id in vChannels.find_vchannel(connection):
         if len(before.channel.members) == 0:
             await before.channel.delete()
             vChannels.delete_Channel(connection, before.channel.id)
@@ -214,16 +208,10 @@ async def bann(ctx, member: discord.Member, *, reason=None):
 
 
 @bot.command()
-async def testbutt(ctx: commands.Context):
-    class MyView(discord.ui.View):
-        @discord.ui.button(label="Test", style=discord.ButtonStyle.primary)
-        async def button_callback(
-            self, button: discord.ui.Button, interaction: discord.Interaction
-        ):
-            await interaction.response.send_message("You pressed a button!")
+async def test(ctx: commands.Context):
 
     view = MyView()
-    await ctx.send("Click Button", view=view)
+    await ctx.send('', view=view)
 
 
 # изменение название голосового канала
