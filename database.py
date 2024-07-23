@@ -26,12 +26,12 @@ class DB:
         except Error as e:
             print(f"The error '{e}' occurred")
 
-    def add_channel(self, connection, vchan, tchan):
+    def add_channel(self, connection, vchan, user):
         add_chan = f"""
         INSERT INTO
-          channels (vchannel, tchannel)
+          channels (vchannel, userid)
         VALUES
-          ({vchan}, {tchan})
+          ({vchan}, {user})
         """
         cursor = connection.cursor()
         try:
@@ -81,9 +81,24 @@ class DB:
         except Error as e:
             print(f"The error '{e}' occurred")
 
+    def find_users_vchan(self, connection, user):
+        find_Chan = f"SELECT vchannel FROM channels WHERE userid = {user}"
+        channs = 0
+        cursor = connection.cursor()
+        try:
+            cursor.execute(find_Chan)
+            res = cursor.fetchall()
+            connection.commit()
+            for i in res:
+                for j in i:
+                    channs = (int(j))
+                    print(j)
+            return channs
+        except Error as e:
+            print(f"The error '{e}' occurred")
+        else:
+            print("it not")
 
-dan = DB()
-connection = dan.create_connection("urVChan.sqlite")
 
 create_users_table = """
 CREATE TABLE IF NOT EXISTS channels (
@@ -93,4 +108,6 @@ CREATE TABLE IF NOT EXISTS channels (
 """
 
 if __name__ == '__main__':
+    dan = DB()
+    connection = dan.create_connection("urVChan.sqlite")
     print(dan.find_channel(connection))
