@@ -7,9 +7,7 @@ import config as cf
 from database import DB
 from myBot import MyBot
 
-# пока не работает через отдельный файл, разобраться
-
-
+# теперь работает, при нажатии на "9" выдает плашку и можно изменять название своего приват канала
 class ChangeName(discord.ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
         intents = discord.Intents.default()  # Подключаем "Разрешения"
@@ -19,6 +17,7 @@ class ChangeName(discord.ui.Modal):
         self.bot = MyBot(command_prefix='/', intents=intents)
         self.database = DB()
         self.connection = self.database.create_connection("urVChan.sqlite")
+        self.GUILD = self.bot.get_guild(1209541686821261342)
         super().__init__(
             discord.ui.InputText(
                 label="Введите название для изменения имени канала",
@@ -31,9 +30,9 @@ class ChangeName(discord.ui.Modal):
     async def callback(self, interaction: discord.Interaction):
         nam = self.children[0].value
         chanid = self.database.find_users_vchan(self.connection, interaction.user.id)
-        vchan = self.bot.get_channel(chanid)
-        await vchan.edit(name=nam)
-        await interaction.response.send_message("Название успешно изменено")
+        chan = discord.utils.get(interaction.guild.channels, id=chanid)
+        await chan.edit(name=nam)
+        await interaction.response.send_message(f"Название успешно изменено на {nam}")
 
 
 class MyView(discord.ui.View):

@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 import config as cf
 from database import DB
-from Cogs import ConfigChannel
+from Cogs import Configs
 from myBot import MyBot
 
 intents = discord.Intents.default()  # Подключаем "Разрешения"
@@ -17,12 +17,6 @@ bot = MyBot(command_prefix='/', intents=intents)
 vChannels = DB()
 connection = vChannels.create_connection("urVChan.sqlite")
 client = discord.Client(intents=intents)
-
-
-@client.event
-async def on_message(message):
-    if message.author == bot.user:
-        return
 
 
 @bot.event
@@ -107,7 +101,7 @@ async def on_voice_state_update(member, before, after):
             vChannels.delete_Channel(connection, before.channel.id)
 
 
-bot.add_cog(ConfigChannel(bot))
+bot.add_cog(Configs(bot))
 
 
 bot.run(cf.TOKEN)

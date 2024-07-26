@@ -5,7 +5,7 @@ from timems import ms
 from SettingVoiceChannels import MyView
 
 
-class ConfigChannel(commands.Cog):
+class Configs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
