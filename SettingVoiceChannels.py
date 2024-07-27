@@ -10,14 +10,8 @@ from myBot import MyBot
 # теперь работает, при нажатии на "9" выдает плашку и можно изменять название своего приват канала
 class ChangeName(discord.ui.Modal):
     def __init__(self, *args, **kwargs) -> None:
-        intents = discord.Intents.default()  # Подключаем "Разрешения"
-        intents.message_content = True
-        intents.members = True
-        # Задаём префикс и интенты
-        self.bot = MyBot(command_prefix='/', intents=intents)
         self.database = DB()
         self.connection = self.database.create_connection("urVChan.sqlite")
-        self.GUILD = self.bot.get_guild(1209541686821261342)
         super().__init__(
             discord.ui.InputText(
                 label="Введите название для изменения имени канала",
@@ -32,23 +26,35 @@ class ChangeName(discord.ui.Modal):
         chanid = self.database.find_users_vchan(self.connection, interaction.user.id)
         chan = discord.utils.get(interaction.guild.channels, id=chanid)
         await chan.edit(name=nam)
-        await interaction.response.send_message(f"Название успешно изменено на {nam}")
+        await interaction.response.send_message(f"Название успешно изменено на {nam}", delete_after=10, ephemeral=True)
 
 
 class MyView(discord.ui.View):
+
+    def __init__(self, *items) -> None:
+        self.database = DB()
+        self.connection = self.database.create_connection("urVChan.sqlite")
+        super().__init__(*items)
+
     @discord.ui.button(label="1", row=0, style=discord.ButtonStyle.secondary)
     async def first_button_callback(
             self, button: discord.ui.Button, interaction: discord.Interaction
     ):
-        mod = MyModal(title='1')
-        await interaction.response.send_modal(mod)
+        chanid = self.database.find_users_vchan(self.connection, interaction.user.id)
+        chan = discord.utils.get(interaction.guild.channels, id=chanid)
+        usr_limit = chan.user_limit
+        await chan.edit(user_limit=usr_limit+1)
+        await interaction.response.send_message("Слоты для канала увеличен на 1", delete_after=10, ephemeral=True)
 
     @discord.ui.button(label="2", row=0, style=discord.ButtonStyle.secondary)
     async def second_button_callback(
             self, button: discord.ui.Button, interaction: discord.Interaction
     ):
-        mod = MyModal(title='test')
-        await interaction.response.send_modal(mod)
+        chanid = self.database.find_users_vchan(self.connection, interaction.user.id)
+        chan = discord.utils.get(interaction.guild.channels, id=chanid)
+        usr_limit = chan.user_limit
+        await chan.edit(user_limit=usr_limit - 1)
+        await interaction.response.send_message("Слоты для канала уменьшен на 1", delete_after=10, ephemeral=True)
 
     @discord.ui.button(label="3", row=0, style=discord.ButtonStyle.secondary)
     async def third_button_callback(

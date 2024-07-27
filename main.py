@@ -20,6 +20,19 @@ client = discord.Client(intents=intents)
 
 
 @bot.event
+async def on_message(message):
+    def not_me(message):
+        return message.author != bot.user
+    if message.author == bot.user:
+        return
+    await bot.process_commands(message)
+    if not_me:
+        channel = bot.get_channel(1263935866854703156)
+        await asyncio.sleep(5)
+        await channel.purge(limit=100, check=not_me)
+
+
+@bot.event
 async def on_member_update(before, after):
     # Логи по тому, какие роли были изменены у данного пользователя
     if before.roles != after.roles:
@@ -83,10 +96,10 @@ async def on_voice_state_update(member, before, after):
         if after.channel.id == 1240184145947263016:
             category = discord.utils.get(GUILD.categories, name='секретка')
             if discord.utils.get(GUILD.channels, name=f'Приват-{member.display_name}') != None:
-                await member.move_to(discord.utils.get(GUILD.channels, name=f'Приват-{member.display_name}')    )
+                await member.move_to(discord.utils.get(GUILD.channels, name=f'Приват-{member.display_name}'))
                 return
 
-            v_channel = await GUILD.create_voice_channel(name=f'Приват-{member.display_name}', category=category)
+            v_channel = await GUILD.create_voice_channel(name=f'Приват-{member.display_name}', category=category, user_limit=2)
             vChannels.add_channel(connection, v_channel.id, member.id)
             await member.move_to(v_channel)
 

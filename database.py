@@ -11,7 +11,6 @@ class DB:
         connection = None
         try:
             connection = sqlite3.connect(path)
-            print("Connection to SQLite DB successful")
         except Error as e:
             print(f"The error '{e}' occurred")
 
@@ -22,7 +21,6 @@ class DB:
         try:
             cursor.execute(query)
             connection.commit()
-            print("Query executed successfully")
         except Error as e:
             print(f"The error '{e}' occurred")
 
@@ -92,7 +90,6 @@ class DB:
             for i in res:
                 for j in i:
                     channs = (int(j))
-                    print(j)
             return channs
         except Error as e:
             print(f"The error '{e}' occurred")
