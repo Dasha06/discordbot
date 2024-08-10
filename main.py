@@ -16,7 +16,6 @@ intents.members = True
 bot = MyBot(command_prefix='/', intents=intents)
 vChannels = DB()
 connection = vChannels.create_connection("urVChan.sqlite")
-client = discord.Client(intents=intents)
 
 
 @bot.event
